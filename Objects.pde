@@ -46,65 +46,95 @@ class Cauldron {
     circle (x, y, size);
   }
   void update() {
-    potionMixes();
+    collisions();
     potionMixing();
-
-  } 
+  }
 }
 
- void potionMixes(){
-    
-    for (int i = 0; i < 8; i++)
-    {
-      if (objects[i].tag == redPotion && pickPotion) {
-        red = true;
-      }
-      if (objects[i].tag == bluePotion && pickPotion) {
-        blue = true;
-      }
-      if (objects[i].tag == greenPotion && pickPotion) {
-        green = true;
-      }
-      if (objects[i].tag == yellowPotion && pickPotion) {
-        yellow = true;
-      } 
-      if (objects[i].tag == apple && pickPotion) {
-        appleP = true;
-      } 
-      if (objects[i].tag == feather && pickPotion) {
-        featherP = true;
-      } 
-      if (objects[i].tag == cowPlant && pickPotion) {
-        cowplant = true;
-      } 
-      if (objects[i].tag == purplePotion && pickPotion) {
-        purple = true;
-      } 
+void collisions() {
+
+  for (int i = 0; i < 8; i++)
+  {
+    pickPotion = dist (mouseX, mouseY, objects[i].x, objects[i].y) < 100 && mousePressed;
+    isHovering = dist (objects[i].x, objects[i].y, cauldron.x, cauldron.y)< cauldron.size/2;
+    if (objects[i].tag == redPotion && isHovering) {
+      red = true;
+    }
+    if (objects[i].tag == bluePotion && isHovering) {
+      blue = true;
+    }
+    if (objects[i].tag == greenPotion && isHovering) {
+      green = true;
+    }
+    if (objects[i].tag == yellowPotion && isHovering) {
+      yellow = true;
+    }
+    if (objects[i].tag == apple && isHovering) {
+      appleP = true;
+    }
+    if (objects[i].tag == feather && isHovering) {
+      featherP = true;
+    }
+    if (objects[i].tag == cowPlant && isHovering) {
+      cowplant = true;
+    }
+    if (objects[i].tag == purplePotion && isHovering) {
+      purple = true;
+    }
+    // PVector lastPOS;
+
+    lastPOS = new PVector (objects[i].x, objects[i].y);
+
+    if (pickPotion) {
+      mouseReleased();
+
+      objects[i].x=mouseX;
+      objects[i].y=mouseY;
+    }
+
+
+    if (isHovering) {
+      canDrop = true;
+    } else {
+      canDrop = false;
+    }
+
+    if (canDrop) {
+      if (!grabbing) {
+        //make pot stir when Ingredient is added
+        stirring.frame =(stirring.frame+1) % stirring.number;
+        magic.play();
+        player.ingredients++;
+        objects[i].x=  (width*2);
+      } else stirring.frame= 0;
     }
   }
-  
-    void potionMixing() {
-    for (int i =0; i < objects.length; i++) {
-      
-      boolean potion1 =appleP && blue && cowplant && canDrop && !grabbing;
-      boolean potion2 = red && featherP &&  yellow;
-      boolean potion3 = green && purple && appleP;
-     
-      print ("apple\t"+ (appleP));
-      
-      if (potion1){
-         player.ingredients=0;
-          
-      }
-      
-       if (potion2){
-         player.ingredients=0;
-          
-      }
-      
-       if (potion3){
-        
-           player.ingredients=0;
-      }
+
+  if (player.ingredients>0 && mousePressed==false) {
+    ui.opacity = 255;
+    ui.text= player.ingredients;
+
+    if (ui.text>2) {
+      ui.text = 0;
+    }
+  } else {
+    ui.opacity=0;
+  }
+}
+
+void potionMixing() {
+  for (int i =0; i < objects.length; i++) {
+
+    boolean potion1 =appleP && blue && cowplant && player.ingredients==3;
+    boolean potion2 = red && featherP &&  yellow && player.ingredients==3;
+    boolean potion3 = green && purple && appleP && player.ingredients==3;
+
+    print ("apple\t"+ (appleP));
+
+    if (potion1||potion2||potion3) {
+      playerSprite.playerPOS.x= width*2;
+      transforming = true;
+      player.ingredients=0;
     }
   }
+}

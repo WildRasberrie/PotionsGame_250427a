@@ -77,6 +77,6 @@ class UI {
     textSize(36);
     textFont(scoreFont);
     fill(redCol);
-    text ("Ingredients \n Used: \t" + player.ingredients, width -283, 50);
+    text ("Ingredients Used: \t" + player.ingredients, 100, 100);
   }
 }
